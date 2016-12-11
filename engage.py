@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import time
+import os
 import yaml
 import jenkinsapi
 
@@ -32,25 +33,24 @@ def setup_pins():
 
 def load_config():
     global config
-    with open('jenkins.yml') as infile:
+    filepath = os.path.dirname(os.path.abspath(__file__))+ '/jenkins.yml'
+    with open(filepath) as infile:
         config = yaml.load(infile)
 
 def setup_client():
     global client
-    global config
     while True:
         try:
-            jenkins = Jenkins(
-                client['url'],
-                client['user'],
-                client['token'],
-                ssl_verify=client['ssl_verify']
+            client = Jenkins(
+                config['url'],
+                config['user'],
+                config['token'],
+                ssl_verify=config['ssl_verify']
             )
             break
         except Exception as e:
             print "error: %s" % e
             time.sleep(5)
-            setup_client()
 
 def toggle(pin):
     time.sleep(0.05)
@@ -62,13 +62,11 @@ def toggle(pin):
 
 def engage(pin):
     time.sleep(0.05)
-    global client
-    global config
-    if (not GPIO.input(ledA)) and (not GPIO.input(ledB)) and GPIO.input(armedButton):
+    if (not GPIO.input(ledA)) and (not GPIO.input(ledB)):
         print "engage!"
-        client.build_job(config['job_name'])
         GPIO.output(ledA, True)
         GPIO.output(ledB, True)
+        client.build_job(config['job_name'])
     else:
         print "warming up..."
 

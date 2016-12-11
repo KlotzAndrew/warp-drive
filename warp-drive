@@ -1,0 +1,47 @@
+#! /bin/bash
+
+### BEGIN INIT INFO
+
+# Provides:          warp-drive
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Warp-drive initscript
+# Description:       This service is used to manage warp-drive
+### END INIT INFO
+
+DIR=/home/pi/scripts/warp-drive
+DAEMON=$DIR/engage.py
+DAEMON_NAME=warp-drive
+
+DAEMON_USER=root
+
+PIDFILE=/var/run/$DAEMON_NAME.pid
+
+do_start () {
+  echo "starting '$DAEMON_NAME'"
+  sudo python $DAEMON &
+}
+do_stop () {
+  echo "stopping '$DAEMON_NAME'"
+  sudo kill -s INT $(ps aux | grep 'sudo python engage.py' | awk '{print $2}')
+}
+
+case "$1" in
+  start|stop)
+    do_${1}
+    ;;
+
+  restart|reload|force-reload)
+    do_stop
+    do_start
+    ;;
+
+  *)
+    echo "Usage: /etc/init.d/$DAEMON_NAME {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+exit 0
+
