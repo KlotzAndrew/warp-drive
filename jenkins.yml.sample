@@ -1,0 +1,6 @@
+job_name: 'my_job_name'
+url: 'my_jenkins_url.com'
+username: 'my_username'
+token: 'user_token'
+ssl_verify: False
+
